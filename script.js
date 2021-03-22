@@ -1,16 +1,26 @@
 var arrGetColor = [];//Массив для хранения  цветов состояний
+
 var arrKeyCol = {};//Массив, у которого ключом яв-ся цвет, а значения состояния
-//Переменная для вывода разбиения
+
+var arrKeyColDuplicate = {};
+var AutomatonDuplicate = {};
+
 var numOfSplits = 1;//Переменная для хранения количеств разбиений
+
+var finalSplit = [];// Массив для ввода пользователем минимального автомата
+
+var lastSplit = false;
+
 var AutomColor = {};
+
 //Create arrayColors of options to be added
 var arrayColors = ['#ffffff', '#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
 
 //Хранение автомата в виде ассоциативного массива
 var AutomatonWithOut = {
     'I/S': ['1', '2', '3', '4', '5', '6', '7', '8'],
-    'a': ['7/0', '4/1', '7/0', '2/1', '7/1', '6/1', '8/0', '7/1'],
-    'b': ['2/0', '4/1', '2/0', '2/1', '7/1', '7/1', '2/0', '4/1'],
+    'a': ['7/0', '4/1', '7/0', '2/1', '4/1', '6/1', '8/0', '7/1'],
+    'b': ['2/0', '4/1', '2/0', '2/1', '2/1', '7/1', '2/0', '4/1'],
     'c': ['2/1', '1/0', '2/1', '3/0', '7/0', '8/0', '6/1', '3/1']
 };
 
@@ -29,7 +39,7 @@ for (const key in AutomatonWithOut) {
     }
 }
 
-//Массив, у которого ключом яв-ся состояние автомата, а значения его выходы
+//Массив, у которого ключом яв-ся состояние автомата, а значения его выходы по каждому символу
 var Outputs = {};
 for (const key in AutomatonWithOut) {
     if (Object.hasOwnProperty.call(AutomatonWithOut, key)) {
@@ -46,17 +56,23 @@ for (const key in AutomatonWithOut) {
 //Заполнение массива цветами, которыми пользователь окрасил состояния
 function getColor() {
     arrGetColor = [];
-    AutomColor = {};
     for (var i = 0; i < arrayColors.length - 1; i++) {
         arrGetColor.push(document.getElementsByClassName('select_el' + numOfSplits)[i].value);
     }
+
+
+}
+
+// Создаем объект, у которого ключом является состояние, а в значениях хранятс цвета переходов по каждому символу
+function fillAutomColor() {
+    AutomColor = {};
     for (const key in Automaton) {
         if (Object.hasOwnProperty.call(Automaton, key)) {
             for (let i = 0; i < Automaton[key].length; i++) {
                 if ('I/S' == key) {
                     AutomColor[Automaton[key][i]] = [];
                 } else {
-                    AutomColor[i + 1].push(arrGetColor[Automaton[key][i]-1]);
+                    AutomColor[i + 1].push(arrGetColor[Automaton[key][i] - 1]);
                 }
             }
         }
@@ -82,18 +98,45 @@ function createPstring() {
     var Pstring = '';
     var div = document.createElement('div');
     div.className = 'Mydiv';
-    Pstring = 'Разбиение P' + numOfSplits + '= { ';
+    Pstring = 'Разбиение P' + numOfSplits + '= {';
+    let indexKey = 0;
     for (const key in arrKeyCol) {
+        indexKey++;
         if (Object.hasOwnProperty.call(arrKeyCol, key)) {
-            Pstring = Pstring + '{ ';
+            Pstring = Pstring + '{';
             for (let i = 0; i < arrKeyCol[key].length; i++) {
                 Pstring = Pstring + arrKeyCol[key][i];
                 if ((i + 1) != arrKeyCol[key].length) Pstring = Pstring + ', ';
             }
-            Pstring = Pstring + ' }';
+            Pstring = Pstring + '}';
+            if (indexKey != Object.keys(arrKeyCol).length) Pstring = Pstring + ', ';
         }
     }
-    Pstring = Pstring + ' }';
+    Pstring = Pstring + '}';
+    div.innerHTML = Pstring;
+    div.style.display = 'block';
+    document.body.appendChild(div);
+    numOfSplits++;
+}
+
+//Функция вывод окна для ввода
+function createInBox() {
+    var div = document.createElement('div');
+    div.className = 'Mydiv';
+    let indexKey = 0;
+    for (const key in arrKeyCol) {
+        indexKey++;
+        if (Object.hasOwnProperty.call(arrKeyCol, key)) {
+            Pstring = Pstring + '{';
+            for (let i = 0; i < arrKeyCol[key].length; i++) {
+                Pstring = Pstring + arrKeyCol[key][i];
+                if ((i + 1) != arrKeyCol[key].length) Pstring = Pstring + ', ';
+            }
+            Pstring = Pstring + '}';
+            if (indexKey != Object.keys(arrKeyCol).length) Pstring = Pstring + ', ';
+        }
+    }
+    Pstring = Pstring + '}';
     div.innerHTML = Pstring;
     div.style.display = 'block';
     document.body.appendChild(div);
@@ -101,30 +144,45 @@ function createPstring() {
 }
 
 //Кнопка подтверждения
-function Confirmation() {
-    if (confirm("Вы подтверждаете операцию?")) {
-        getColor();
-        fillArrKeyCol();
-        if ((checkingOuts(Outputs) == true) && (numOfSplits == 1)) {
-            createPstring();
-            createTable(Automaton);
-            createButton();
+function Confirmation(buttonId) {
+    if (buttonId == 'buttonP' + numOfSplits) {
+        if (confirm("Вы подтверждаете операцию?")) {
+            getColor();
+            fillArrKeyCol();
+            if ((numOfSplits == 1) && (checkingOuts(Outputs) == true)) {
+                createPstring();
+                createTable(Automaton, arrKeyCol);
+                createButton();
+                fillAutomColor();
+            }
+            else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true)) {
+                fillAutomColor();
+                if ((checkingOuts(AutomColor) == true) && numOfSplits == 3) {
+                    createPstring();
+                    createTable(Automaton, arrKeyCol);
+
+                    createMinAut();
+
+                    createPstring();
+                    createTable(AutomatonDuplicate, arrKeyColDuplicate);
+                }
+                else {
+                    createPstring();
+                    createTable(Automaton, arrKeyCol);
+                    createButton();
+                }
+            }
+            else alert("Неправильное разбиение");
+            return (true);
+        } else {
+            alert("Подождем");
+            return (false);
         }
-        else if ((numOfSplits > 1)&&(checkingOuts(AutomColor) == true)) {
-            createPstring();
-            createTable(Automaton);
-            createButton();
-        }
-        else alert("Неправильное разбиение");
-        return (true);
-    } else {
-        alert("Подождем");
-        return (false);
     }
 }
 
 //Функция создания таблицы
-function createTable(arrLoc) {
+function createTable(arrLoc, arrKeyLoc) {
     var body = document.getElementsByTagName('body')[0];
     var tbl = document.createElement('table');
     tbl.className = 'Mytable';
@@ -137,9 +195,9 @@ function createTable(arrLoc) {
             tr.appendChild(td);
             for (var j = 0; j < arrLoc[key].length; j++) {
                 var td = document.createElement('td');
-                colorizing(arrKeyCol, arrLoc[key][j], td);
+                colorizing(arrKeyLoc, arrLoc[key][j], td);
                 td.appendChild(document.createTextNode(arrLoc[key][j]));
-                if (key == 'I/S') {
+                if (key == 'I/S' && numOfSplits != 4) {
                     createSelect(td);
                 }
                 tr.appendChild(td);
@@ -186,15 +244,17 @@ function checkingOuts(localArr) {
 
         }
     }
+
+    // for (const key in arrKeyCol) {
+    //     if (Object.hasOwnProperty.call(arrKeyCol, key)) {
+    //         for (let i = 0; i < arrKeyCol[key].length; i++) {
+
+    //         }
+    //     }
+    // }
+    // arrKeyColDuplicate = arrKeyCol;
     return true;
 }
-
-// //
-// function chekingState() {
-//     for (const key in object) {
-        
-//     }
-// }
 
 //Функция окрашивания ячеек
 function colorizing(arr, value, td) {
@@ -237,14 +297,81 @@ function createSelect(element) {
 
 function createButton() {
     var button = document.createElement('button');
+    button.id = 'buttonP' + numOfSplits;
     button.innerHTML = 'Подтвердить';
     button.className = 'buttonP';
     button.onclick = function () {
-        Confirmation();
+        Confirmation(button.id);
         return false;
     };
     document.body.appendChild(button);
-    //className = 'buttonP' + numOfSplits
+}
+
+function createMinAut() {
+    var i = 0;
+    numOfSplits--;
+    finalSplit = [1, 4, 5, 6, 7, 8];
+    var tempVar;
+
+    for (const key in Automaton) {
+        AutomatonDuplicate[key] = [];
+        if (Object.hasOwnProperty.call(Automaton, key)) {
+            var j = 0;
+            for (let i = 0; i < Automaton[key].length; i++) {
+                // if (!(key in AutomatonDuplicate)) {
+                // }
+                if ((key != 'I/S') && ((i + 1) == finalSplit[j])) {
+                    AutomatonDuplicate[key].push(Automaton[key][i]);
+                    j++;
+                }
+                else if ((i + 1) == finalSplit[j]) {
+                    AutomatonDuplicate[key].push(Automaton[key][i]);
+                    j++;
+                }
+
+            }
+        }
+    }
+
+
+    for (const key1 in arrKeyCol) {
+        if (Object.hasOwnProperty.call(arrKeyCol, key1)) {
+            if (arrKeyCol[key1].length > 1) {
+                arrKeyColDuplicate[key1] = [];
+                for (var j = 0; j < arrKeyCol[key1].length; j++) {
+                    for (let index = 0; index < finalSplit.length; index++) {
+                        if (finalSplit[index] == arrKeyCol[key1][j]) {
+                            for (var p = 0; p < arrKeyCol[key1].length; p++)
+                                if (finalSplit[index] != arrKeyCol[key1][p]) {
+                                    for (const key2 in AutomatonDuplicate) {
+                                        if (Object.hasOwnProperty.call(AutomatonDuplicate, key2)) {
+                                            for (let k = 0; k < AutomatonDuplicate[key2].length; k++) {
+                                                if ((key2 != 'I/S') && (arrKeyCol[key1][p] == AutomatonDuplicate[key2][k]))
+                                                    AutomatonDuplicate[key2][k] = finalSplit[index];
+                                            }
+                                        }
+                                    }
+                                }
+                            arrKeyColDuplicate[key1].push(arrKeyCol[key1][j]);
+                        }
+                    }
+                }
+            }
+            else {
+                arrKeyColDuplicate[key1] = [];
+                arrKeyColDuplicate[key1].push(arrKeyCol[key1][0]);
+            }
+        }
+    }
+    console.log(arrKeyColDuplicate);
+    console.log(AutomatonDuplicate);
+    // {
+    //     tempVar = arrKeyCol[key1][j];
+    //     //arrKeyColDuplicate[key1] = arrKeyCol[key1][j];
+    //     // delete arrKeyCol[key1][j];
+    //     // delete Automaton['I/S'][j];
+
+    // }  
 }
 
 //Функция, которая вызывается при загрузке сайта
