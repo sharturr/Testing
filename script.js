@@ -59,8 +59,6 @@ function getColor() {
     for (var i = 0; i < arrayColors.length - 1; i++) {
         arrGetColor.push(document.getElementsByClassName('select_el' + numOfSplits)[i].value);
     }
-
-
 }
 
 // Создаем объект, у которого ключом является состояние, а в значениях хранятс цвета переходов по каждому символу
@@ -94,22 +92,22 @@ function fillArrKeyCol() {
 }
 
 //Функция вывод образовавшегося разбиения
-function createPstring() {
+function createPstring(obj) {
     var Pstring = '';
     var div = document.createElement('div');
     div.className = 'Mydiv';
     Pstring = 'Разбиение P' + numOfSplits + '= {';
     let indexKey = 0;
-    for (const key in arrKeyCol) {
+    for (const key in obj) {
         indexKey++;
-        if (Object.hasOwnProperty.call(arrKeyCol, key)) {
+        if (Object.hasOwnProperty.call(obj, key)) {
             Pstring = Pstring + '{';
-            for (let i = 0; i < arrKeyCol[key].length; i++) {
-                Pstring = Pstring + arrKeyCol[key][i];
-                if ((i + 1) != arrKeyCol[key].length) Pstring = Pstring + ', ';
+            for (let i = 0; i < obj[key].length; i++) {
+                Pstring = Pstring + obj[key][i];
+                if ((i + 1) != obj[key].length) Pstring = Pstring + ', ';
             }
             Pstring = Pstring + '}';
-            if (indexKey != Object.keys(arrKeyCol).length) Pstring = Pstring + ', ';
+            if (indexKey != Object.keys(obj).length) Pstring = Pstring + ', ';
         }
     }
     Pstring = Pstring + '}';
@@ -150,31 +148,50 @@ function Confirmation(buttonId) {
             getColor();
             fillArrKeyCol();
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true)) {
-                createPstring();
+                createPstring(arrKeyCol);
                 createTable(Automaton, arrKeyCol);
-                createButton();
+                createButton(false);
+                createEndButton()
                 fillAutomColor();
             }
             else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true)) {
+
+                // if ((checkingOuts(AutomColor) == true) && lastSplit == true) {
+                //     createPstring(arrKeyCol);
+                //     createTable(Automaton, arrKeyCol);
+                // }
+                // else {
+                createPstring(arrKeyCol);
+                createTable(Automaton, arrKeyCol);
+                createButton(false);
+                createEndButton();
                 fillAutomColor();
-                if ((checkingOuts(AutomColor) == true) && numOfSplits == 3) {
-                    createPstring();
-                    createTable(Automaton, arrKeyCol);
-
-                    createMinAut();
-
-                    createPstring();
-                    createTable(AutomatonDuplicate, arrKeyColDuplicate);
-                }
-                else {
-                    createPstring();
-                    createTable(Automaton, arrKeyCol);
-                    createButton();
-                }
+                // }
             }
             else alert("Неправильное разбиение");
             return (true);
         } else {
+            alert("Подождем");
+            return (false);
+        }
+    }
+    else if (buttonId == 'LastButton') {
+        if (confirm("Вы подтверждаете операцию?")) {
+            var val = document.getElementById('inputP' + numOfSplits).value;
+            val.split(' ');
+            var jindex = 0;
+            for (let index = 0; index < val.length; index += 2) {
+                finalSplit[jindex] = val[index];
+                jindex++;
+            }
+            createMinAut();
+            lastSplit = true;
+            createPstring(arrKeyColDuplicate);
+            console.log(AutomatonDuplicate);
+            createTable(AutomatonDuplicate, arrKeyColDuplicate);
+            return (true);
+        }
+        else {
             alert("Подождем");
             return (false);
         }
@@ -197,7 +214,7 @@ function createTable(arrLoc, arrKeyLoc) {
                 var td = document.createElement('td');
                 colorizing(arrKeyLoc, arrLoc[key][j], td);
                 td.appendChild(document.createTextNode(arrLoc[key][j]));
-                if (key == 'I/S' && numOfSplits != 4) {
+                if (key == 'I/S' && lastSplit != true) {
                     createSelect(td);
                 }
                 tr.appendChild(td);
@@ -295,9 +312,10 @@ function createSelect(element) {
     });
 }
 
-function createButton() {
+function createButton(last) {
     var button = document.createElement('button');
-    button.id = 'buttonP' + numOfSplits;
+    if (!last) button.id = 'buttonP' + numOfSplits;
+    else button.id = 'LastButton';
     button.innerHTML = 'Подтвердить';
     button.className = 'buttonP';
     button.onclick = function () {
@@ -307,24 +325,32 @@ function createButton() {
     document.body.appendChild(button);
 }
 
-function createMinAut() {
-    var i = 0;
-    numOfSplits--;
-    finalSplit = [1, 4, 5, 6, 7, 8];
-    var tempVar;
+function createEndButton() {
+    var button = document.createElement('button');
+    button.id = 'EndbuttonP' + numOfSplits;
+    button.innerHTML = 'Всё!';
+    button.className = 'buttonP';
+    button.onclick = function () {
+        end(button.id);
+        return false;
+    };
+    document.body.appendChild(button);
+}
 
+function createMinAut() {
+    numOfSplits--;
+
+    //Происходит дублирование по одному состоянию из каждого класса (строится минимальный автомат)
     for (const key in Automaton) {
         AutomatonDuplicate[key] = [];
         if (Object.hasOwnProperty.call(Automaton, key)) {
             var j = 0;
             for (let i = 0; i < Automaton[key].length; i++) {
-                // if (!(key in AutomatonDuplicate)) {
-                // }
-                if ((key != 'I/S') && ((i + 1) == finalSplit[j])) {
+                if ((key != 'I/S') && (Automaton['I/S'][i] == finalSplit[j])) {
                     AutomatonDuplicate[key].push(Automaton[key][i]);
                     j++;
                 }
-                else if ((i + 1) == finalSplit[j]) {
+                else if (Automaton['I/S'][i] == finalSplit[j]) {
                     AutomatonDuplicate[key].push(Automaton[key][i]);
                     j++;
                 }
@@ -333,7 +359,7 @@ function createMinAut() {
         }
     }
 
-
+    //Переписывается объект с ключом цвет и значениям состояний минимального автомата, переименовываются состояния из одного класса
     for (const key1 in arrKeyCol) {
         if (Object.hasOwnProperty.call(arrKeyCol, key1)) {
             if (arrKeyCol[key1].length > 1) {
@@ -363,35 +389,40 @@ function createMinAut() {
             }
         }
     }
-    console.log(arrKeyColDuplicate);
-    console.log(AutomatonDuplicate);
-    // {
-    //     tempVar = arrKeyCol[key1][j];
-    //     //arrKeyColDuplicate[key1] = arrKeyCol[key1][j];
-    //     // delete arrKeyCol[key1][j];
-    //     // delete Automaton['I/S'][j];
+}
 
-    // }  
+function createInput() {
+    var input = document.createElement('input');
+    input.type = "text";
+    input.id = 'inputP' + numOfSplits;
+    input.className = 'inputP';
+    document.body.appendChild(input);
 }
 
 //Функция, которая вызывается при загрузке сайта
 function start() {
     createTable(AutomatonWithOut);
-    createButton();
+    createButton(false);
 }
 
-// //Преобразование string в hex
-// function ConvertStringToHex(str) {
-//     var arr = [];
-//     for (var i = 0; i < str.length; i++) {
-//         arr[i] = ("00" + str.charCodeAt(i).toString(16)).slice(-4);
-//     }
-//     return "\\u" + arr.join("\\u");
-// }
-
-    // $(document).ready(function(){
-    //     $('select').on('change',function(){
-    //       $(this).css({color: $(this).find('option:selected').data('color')});
-    //     });
-    //   }); 
-    //<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+function end(EndbuttonId) {
+    if (confirm("Вы подтверждаете операцию?")) {
+        if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
+            if (checkingOuts(AutomColor) == true) {
+                var div = document.createElement('div');
+                div.className = 'Information';
+                div.innerHTML = 'Введите через пробелы минимальную форму автомата. Пример: 1 2 3 4 5';
+                div.style.display = 'block';
+                document.body.appendChild(div);
+                createInput()
+                createButton(true);
+            }
+            else alert("Неправильно!");
+        }
+        else alert("Неправильно выбранны состояния");
+        return (true);
+    } else {
+        alert("Подождем");
+        return (false);
+    }
+}
