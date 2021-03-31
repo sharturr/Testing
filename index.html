@@ -22,7 +22,8 @@
             /* Цвет текста */
             border-spacing: 3px;
             /* Расстояние между ячейками */
-            margin: 30px auto;
+            margin: 10px auto;
+            margin-bottom: 15px;
             /*Расположние таблицы на сайте*/
         }
 
@@ -54,6 +55,7 @@
             line-height: 45px;
             border-radius: 20px;
             margin: 0px 50%;
+            margin-bottom: 30px;
             transform: translateX(-50%);
             font-family: 'Montserrat', sans-serif;
             font-size: 15px;
@@ -66,7 +68,7 @@
             transition: .3s;
         }
 
-        button:hover {
+        button.buttonP:hover {
             background: #2EE59D;
             box-shadow: 0 15px 20px rgba(46, 229, 157, .4);
             color: white;
@@ -76,6 +78,7 @@
         /*Стиль окна вывода P разбиения*/
         div.Mydiv {
             margin: 30px auto;
+            margin-bottom: 10px;
             width: 600px;
             padding-top: 5px;
             padding-bottom: 5px;
@@ -85,19 +88,27 @@
             background: white;
             border: solid 2px #2EE59D;
             border-radius: 10px;
-            display: none;
+            /* display: none; */
         }
+
         div.Information {
             margin: 10px auto;
-            width: 600px;
+            width: 500px;
             padding-top: 5px;
             padding-bottom: 5px;
             padding-left: 7px;
             text-align: left;
-            font-size: 15px;
+            font-size: 20px;
             border-radius: 10px;
-            display: none;
+            background: lightgrey;
+            border-color: gray;
+            /* display: none; */
         }
+
+        div.endBlock {
+            margin: 30px auto;
+        }
+
         /*Стиль окна ввода*/
         input.inputP {
             /* position: absolute; */
@@ -111,6 +122,23 @@
             background: white;
             border: solid 2px #2EE59D;
             border-radius: 10px;
+        }
+
+        div.flex {
+            display: -webkit-box;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: -webkit-flex;
+            display: flex;
+        }
+
+        div.flex-child {
+            -webkit-box-flex: 1 1 auto;
+            -moz-box-flex: 1 1 auto;
+            -webkit-flex: 1 1 auto;
+            -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+            margin-right: 5px;
         }
     </style>
 </head>

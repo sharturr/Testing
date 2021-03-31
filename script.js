@@ -150,23 +150,25 @@ function Confirmation(buttonId) {
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true)) {
                 createPstring(arrKeyCol);
                 createTable(Automaton, arrKeyCol);
-                createButton(false);
-                createEndButton()
-                fillAutomColor();
-            }
-            else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true)) {
-
-                // if ((checkingOuts(AutomColor) == true) && lastSplit == true) {
-                //     createPstring(arrKeyCol);
-                //     createTable(Automaton, arrKeyCol);
-                // }
-                // else {
-                createPstring(arrKeyCol);
-                createTable(Automaton, arrKeyCol);
+                var div = document.createElement('div');
+                div.className = 'flex';
                 createButton(false);
                 createEndButton();
+                document.body.appendChild(div);
                 fillAutomColor();
-                // }
+                disableButton(buttonId);
+            }
+            else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true)) {
+                disableButton(buttonId);
+                disableButton('EndbuttonP' + numOfSplits);
+                createPstring(arrKeyCol);
+                createTable(Automaton, arrKeyCol);
+                var div = document.createElement('div');
+                div.className = 'flex';
+                createButton(false);
+                createEndButton();
+                document.body.appendChild(div);
+                fillAutomColor();
             }
             else alert("Неправильное разбиение");
             return (true);
@@ -186,9 +188,9 @@ function Confirmation(buttonId) {
             }
             createMinAut();
             lastSplit = true;
-            createPstring(arrKeyColDuplicate);
-            console.log(AutomatonDuplicate);
             createTable(AutomatonDuplicate, arrKeyColDuplicate);
+            disableButton(buttonId);
+            divF();
             return (true);
         }
         else {
@@ -212,10 +214,10 @@ function createTable(arrLoc, arrKeyLoc) {
             tr.appendChild(td);
             for (var j = 0; j < arrLoc[key].length; j++) {
                 var td = document.createElement('td');
-                colorizing(arrKeyLoc, arrLoc[key][j], td);
+                if (lastSplit != true) colorizing(arrKeyLoc, arrLoc[key][j], td);
                 td.appendChild(document.createTextNode(arrLoc[key][j]));
                 if (key == 'I/S' && lastSplit != true) {
-                    createSelect(td);
+                    createSelect(td, j);
                 }
                 tr.appendChild(td);
             }
@@ -289,7 +291,7 @@ function colorizing(arr, value, td) {
 }
 
 //Функция создания списка с выбором цветов
-function createSelect(element) {
+function createSelect(element, index) {
     var myParent = element;
 
     //Create and append select list
@@ -301,6 +303,16 @@ function createSelect(element) {
     //Create and append the options
     for (var i = 0; i < arrayColors.length; i++) {
         var option = document.createElement("option");
+        // if(arrKeyCol!= 0 && i==0){
+        //     for (const key in arrKeyCol) {
+        //         if (Object.hasOwnProperty.call(arrKeyCol, key)) {
+        //             for (let k = 0; k < arrKeyCol[key].length; k++) {
+        //                 if(index==arrKeyCol[key][k]) option.value = key;
+        //             }
+        //         }
+        //     }
+        // }
+        // else 
         option.value = arrayColors[i];
         //option.text = arrayColors[i];
         option.style.backgroundColor = arrayColors[i];
@@ -328,7 +340,7 @@ function createButton(last) {
 function createEndButton() {
     var button = document.createElement('button');
     button.id = 'EndbuttonP' + numOfSplits;
-    button.innerHTML = 'Всё!';
+    button.innerHTML = 'Завершить';
     button.className = 'buttonP';
     button.onclick = function () {
         end(button.id);
@@ -341,18 +353,15 @@ function createMinAut() {
     numOfSplits--;
 
     //Происходит дублирование по одному состоянию из каждого класса (строится минимальный автомат)
-    for (const key in Automaton) {
+    for (const key in AutomatonWithOut) {
         AutomatonDuplicate[key] = [];
-        if (Object.hasOwnProperty.call(Automaton, key)) {
-            var j = 0;
-            for (let i = 0; i < Automaton[key].length; i++) {
-                if ((key != 'I/S') && (Automaton['I/S'][i] == finalSplit[j])) {
-                    AutomatonDuplicate[key].push(Automaton[key][i]);
-                    j++;
-                }
-                else if (Automaton['I/S'][i] == finalSplit[j]) {
-                    AutomatonDuplicate[key].push(Automaton[key][i]);
-                    j++;
+        if (Object.hasOwnProperty.call(AutomatonWithOut, key)) {
+            for (let i = 0; i < AutomatonWithOut[key].length; i++) {
+                for (let j = 0; j < finalSplit.length; j++) {
+                    if ((key != 'I/S') && (AutomatonWithOut['I/S'][i] == finalSplit[j]))
+                        AutomatonDuplicate[key].push(AutomatonWithOut[key][i]);
+                    else if (AutomatonWithOut['I/S'][i] == finalSplit[j])
+                        AutomatonDuplicate[key].push(AutomatonWithOut[key][i]);
                 }
 
             }
@@ -372,8 +381,8 @@ function createMinAut() {
                                     for (const key2 in AutomatonDuplicate) {
                                         if (Object.hasOwnProperty.call(AutomatonDuplicate, key2)) {
                                             for (let k = 0; k < AutomatonDuplicate[key2].length; k++) {
-                                                if ((key2 != 'I/S') && (arrKeyCol[key1][p] == AutomatonDuplicate[key2][k]))
-                                                    AutomatonDuplicate[key2][k] = finalSplit[index];
+                                                if ((key2 != 'I/S') && (arrKeyCol[key1][p] == AutomatonDuplicate[key2][k].split('/')[0]))
+                                                    AutomatonDuplicate[key2][k] = finalSplit[index] + '/' + AutomatonDuplicate[key2][k].split('/')[1];
                                             }
                                         }
                                     }
@@ -411,11 +420,13 @@ function end(EndbuttonId) {
             if (checkingOuts(AutomColor) == true) {
                 var div = document.createElement('div');
                 div.className = 'Information';
-                div.innerHTML = 'Введите через пробелы минимальную форму автомата. Пример: 1 2 3 4 5';
+                div.innerHTML = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1, 3, 4.';
                 div.style.display = 'block';
                 document.body.appendChild(div);
                 createInput()
                 createButton(true);
+                disableButton('buttonP' + numOfSplits);
+                disableButton(EndbuttonId);
             }
             else alert("Неправильно!");
         }
@@ -425,4 +436,20 @@ function end(EndbuttonId) {
         alert("Подождем");
         return (false);
     }
+}
+
+function disableButton(buttonId) {
+    var elem = document.getElementById(buttonId);
+    elem.disabled = 'true';
+    elem.classList.remove('buttonP');
+    elem.style.background = 'lightgrey';
+
+}
+
+
+function divF(){
+    var div = document.createElement('div');
+    div.style.display = 'block';
+    div.className = 'endBlock';
+    document.body.appendChild(div);
 }
