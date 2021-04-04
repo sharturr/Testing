@@ -118,7 +118,7 @@ function checkInputStates() {
                     for (let j = 0; j < finalSplit.length; j++) {
                         if (finalSplit[j] == arrKeyCol[key][i]) {
                             index++
-                            hasAllStates ++;
+                            hasAllStates++;
                         };
                         if (index > 1) {
                             console.log(index);
@@ -129,21 +129,21 @@ function checkInputStates() {
                 }
             }
         }
-        if(hasAllStates == finalSplit.length)
-        return true;
+        if (hasAllStates == finalSplit.length)
+            return true;
     }
     else return false;
 }
 
 //Проверяем новая раскраска у автомата или нет
-function chekingSimilarP(){
+function chekingSimilarP() {
     var similarP = true;
     for (const key in arrKeyCol) {
         if (Object.hasOwnProperty.call(arrKeyCol, key) && Object.hasOwnProperty.call(arrKeyColCheck, key)) {
-            if(arrKeyColCheck[key].length == arrKeyCol[key].length)
-            for (let i = 0; i < arrKeyCol[key].length; i++) {
-                if(arrKeyColCheck[key][i]!=arrKeyCol[key][i]) similarP = false;
-            }
+            if (arrKeyColCheck[key].length == arrKeyCol[key].length)
+                for (let i = 0; i < arrKeyCol[key].length; i++) {
+                    if (arrKeyColCheck[key][i] != arrKeyCol[key][i]) similarP = false;
+                }
             else similarP = false;
         }
         else similarP = false;
@@ -195,7 +195,7 @@ function Confirmation(buttonId) {
                 fillAutomColor();
                 disableButton(buttonId);
             }
-            else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true)&& chekingSimilarP() == false) {
+            else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true) && chekingSimilarP() == false) {
                 disableButton(buttonId);
                 disableButton('EndbuttonP' + numOfSplits);
                 createPstring(arrKeyCol);
