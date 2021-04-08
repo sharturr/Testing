@@ -17,8 +17,8 @@ var AutomColor = {};
 
 
 var string1 = 'Вам предоставлена таблица переходов-выходов автомата. Раскрашивайте ячейки состояний в соотвествии с вашим разбиеним. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
-var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Если вы считате, что построенный вами автомат минимален, то нажмите "Завершить"';
-var string3 = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1, 3, 4.';
+var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Если вы считате, что текущее разбиение совпадаетс предыдущим, то нажмите "Завершить"';
+var string3 = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1 3 4. Согласно выбранным состояниям будет построена минимальная форма';
 
 //Create arrayColors of options to be added
 var arrayColors = ['#ffffff', '#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
@@ -188,12 +188,13 @@ function Confirmation(buttonId) {
             getColor();
             fillArrKeyCol();
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true) && chekingSimilarP() == false) {
+                disableButton(buttonId);
                 Information(string2);
                 createPstring(arrKeyCol);
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
-                disableButton(buttonId);
+                
             }
             else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true) && chekingSimilarP() == false) {
                 disableButton(buttonId);
@@ -213,12 +214,12 @@ function Confirmation(buttonId) {
     else if (buttonId == 'LastButton') {
         if (confirm("Вы подтверждаете операцию?")) {
             if (checkInputStates() == true) {
+                disableButton(buttonId);
                 createMinAut();
                 lastSplit = true;
-                EmptyBlock();
-                Information('Поздравляем, вы справились! Вот ваша минимальная форма автомата.');
+                Information('Поздравляем, вы справились!');
                 createTable(AutomatonDuplicate, arrKeyColDuplicate);
-                disableButton(buttonId);
+                
                 EmptyBlock();
             }
             else alert("Неправильно введены состояния!");
@@ -439,9 +440,10 @@ function createTable(arrLoc, arrKeyLoc) {
 //Отключение кнопок, с которыми пользователь уже взаимодействовал
 function disableButton(buttonId) {
     var elem = document.getElementById(buttonId);
-    elem.disabled = 'true';
-    elem.classList.remove('buttonP');
-    elem.style.background = 'lightgrey';
+    // elem.disabled = 'true';
+    // elem.classList.remove('buttonP');
+    // elem.style.background = 'lightgrey';
+    elem.style.visibility = 'hidden';
 }
 
 function EmptyBlock() {
@@ -509,11 +511,12 @@ function end(EndbuttonId) {
     if (confirm("Вы подтверждаете операцию?")) {
         if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
             if (checkingOuts(AutomColor) == true) {
+                disableButton('buttonP' + numOfSplits);
+                disableButton(EndbuttonId);
                 Information(string3);
                 createInput()
                 createButton(true, document.body);
-                disableButton('buttonP' + numOfSplits);
-                disableButton(EndbuttonId);
+                
             }
             else alert("Вы построили не все разбиения!");
         }
