@@ -16,8 +16,8 @@ var lastSplit = false;
 var AutomColor = {};
 
 
-var string1 = 'Вам предоставлена таблица переходов-выходов автомата. Раскрашивайте ячейки состояний в соотвествии с вашим разбиеним. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
-var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Если вы считате, что текущее разбиение совпадаетс предыдущим, то нажмите "Завершить"';
+var string1 = 'Постройте разбиение P1, т.е раскрасте один эквивалентные состояния. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
+var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Постройте разбиение P2. Если вы считате, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"';
 var string3 = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1 3 4. Согласно выбранным состояниям будет построена минимальная форма';
 
 //Create arrayColors of options to be added
@@ -189,8 +189,8 @@ function Confirmation(buttonId) {
             fillArrKeyCol();
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true) && chekingSimilarP() == false) {
                 disableButton(buttonId);
-                Information(string2);
                 createPstring(arrKeyCol);
+                Information(string2);
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
@@ -200,6 +200,7 @@ function Confirmation(buttonId) {
                 disableButton(buttonId);
                 disableButton('EndbuttonP' + numOfSplits);
                 createPstring(arrKeyCol);
+                Information('Постройте разбиение P'+numOfSplits + '. Если вы считате, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
@@ -219,8 +220,6 @@ function Confirmation(buttonId) {
                 lastSplit = true;
                 Information('Поздравляем, вы справились!');
                 createTable(AutomatonDuplicate, arrKeyColDuplicate);
-                
-                EmptyBlock();
             }
             else alert("Неправильно введены состояния!");
             return (true);
@@ -444,13 +443,6 @@ function disableButton(buttonId) {
     // elem.classList.remove('buttonP');
     // elem.style.background = 'lightgrey';
     elem.style.visibility = 'hidden';
-}
-
-function EmptyBlock() {
-    var div = document.createElement('div');
-    div.style.display = 'block';
-    div.className = 'EmptyBlock';
-    document.body.appendChild(div);
 }
 
 // Создаем объект, у которого ключом является состояние, а в значениях хранятс цвета переходов по каждому символу
