@@ -1,27 +1,26 @@
 var arrGetColor = [];//Массив для хранения  цветов состояний
 
-var arrKeyCol = {};//Массив, у которого ключом яв-ся цвет, а значения состояния
+var arrKeyCol = {};//Объект, у которого ключом яв-ся цвет, а значения состояния
+var arrKeyMin = {};
 
-var arrKeyColDuplicate = {};
-var AutomatonDuplicate = {};
-
-var arrKeyColCheck = {};
+var arrKeyColDuplicate = {};//Хранит в себе предыдущие параметры arrKeyCol
 
 var numOfSplits = 1;//Переменная для хранения количеств разбиений
 
 var finalSplit = [];// Массив для ввода пользователем минимального автомата
 
-var lastSplit = false;
+var lastSplit = false;//Булева переменная, для хранении информации о последнем разбиении
 
-var AutomColor = {};
+var AutomColor = {};//объект с ключом состояние, а в значениях хранятся цвета переходов по каждому символу
 
 
-var string1 = 'Постройте разбиение P1, т.е раскрасте один эквивалентные состояния. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
-var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Постройте разбиение P2. Если вы считате, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"';
+var string1 = 'Постройте разбиение P1, т.е раскрасьте один-эквивалентные состояния. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
+var string2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Постройте разбиение P2. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"';
 var string3 = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1 3 4. Согласно выбранным состояниям будет построена минимальная форма';
 
 //Create arrayColors of options to be added
 var arrayColors = ['#ffffff', '#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
+//var arrayColorsDupl = arrayColors;
 
 //Хранение автомата в виде ассоциативного массива
 var AutomatonWithOut = {
@@ -33,6 +32,7 @@ var AutomatonWithOut = {
 
 //Копия автомата без выходов
 var Automaton = {};
+var AutomatonMin = {};
 for (const key in AutomatonWithOut) {
     if (Object.hasOwnProperty.call(AutomatonWithOut, key)) {
         for (let i = 0; i < AutomatonWithOut[key].length; i++) {
@@ -139,10 +139,10 @@ function checkInputStates() {
 function chekingSimilarP() {
     var similarP = true;
     for (const key in arrKeyCol) {
-        if (Object.hasOwnProperty.call(arrKeyCol, key) && Object.hasOwnProperty.call(arrKeyColCheck, key)) {
-            if (arrKeyColCheck[key].length == arrKeyCol[key].length)
+        if (Object.hasOwnProperty.call(arrKeyCol, key) && Object.hasOwnProperty.call(arrKeyColDuplicate, key)) {
+            if (arrKeyColDuplicate[key].length == arrKeyCol[key].length)
                 for (let i = 0; i < arrKeyCol[key].length; i++) {
-                    if (arrKeyColCheck[key][i] != arrKeyCol[key][i]) similarP = false;
+                    if (arrKeyColDuplicate[key][i] != arrKeyCol[key][i]) similarP = false;
                 }
             else similarP = false;
         }
@@ -150,12 +150,12 @@ function chekingSimilarP() {
     }
 
     if (similarP == false) {
-        arrKeyColCheck = {};
+        arrKeyColDuplicate = {};
         for (const key in arrKeyCol) {
             if (Object.hasOwnProperty.call(arrKeyCol, key)) {
-                arrKeyColCheck[key] = [];
+                arrKeyColDuplicate[key] = [];
                 for (let i = 0; i < arrKeyCol[key].length; i++) {
-                    arrKeyColCheck[key].push(arrKeyCol[key][i]);
+                    arrKeyColDuplicate[key].push(arrKeyCol[key][i]);
                 }
             }
         }
@@ -188,9 +188,10 @@ function Confirmation(buttonId) {
             getColor();
             fillArrKeyCol();
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true) && chekingSimilarP() == false) {
-                disableButton(buttonId);
+                disableButton(buttonId); 
                 createPstring(arrKeyCol);
                 Information(string2);
+                //removeColor();
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
@@ -199,8 +200,10 @@ function Confirmation(buttonId) {
             else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true) && chekingSimilarP() == false) {
                 disableButton(buttonId);
                 disableButton('EndbuttonP' + numOfSplits);
+                disableButton('tableB' + numOfSplits);
                 createPstring(arrKeyCol);
-                Information('Постройте разбиение P'+numOfSplits + '. Если вы считате, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
+                Information('Постройте разбиение P'+numOfSplits + '. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
+                //removeColor();
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
@@ -219,7 +222,7 @@ function Confirmation(buttonId) {
                 createMinAut();
                 lastSplit = true;
                 Information('Поздравляем, вы справились!');
-                createTable(AutomatonDuplicate, arrKeyColDuplicate);
+                createTable(AutomatonMin, arrKeyMin);
             }
             else alert("Неправильно введены состояния!");
             return (true);
@@ -297,14 +300,14 @@ function createMinAut() {
 
     //Происходит дублирование по одному состоянию из каждого класса (строится минимальный автомат)
     for (const key in AutomatonWithOut) {
-        AutomatonDuplicate[key] = [];
+        AutomatonMin[key] = [];
         if (Object.hasOwnProperty.call(AutomatonWithOut, key)) {
             for (let i = 0; i < AutomatonWithOut[key].length; i++) {
                 for (let j = 0; j < finalSplit.length; j++) {
                     if ((key != 'I/S') && (AutomatonWithOut['I/S'][i] == finalSplit[j]))
-                        AutomatonDuplicate[key].push(AutomatonWithOut[key][i]);
+                        AutomatonMin[key].push(AutomatonWithOut[key][i]);
                     else if (AutomatonWithOut['I/S'][i] == finalSplit[j])
-                        AutomatonDuplicate[key].push(AutomatonWithOut[key][i]);
+                        AutomatonMin[key].push(AutomatonWithOut[key][i]);
                 }
 
             }
@@ -315,29 +318,29 @@ function createMinAut() {
     for (const key1 in arrKeyCol) {
         if (Object.hasOwnProperty.call(arrKeyCol, key1)) {
             if (arrKeyCol[key1].length > 1) {
-                arrKeyColDuplicate[key1] = [];
+                arrKeyMin[key1] = [];
                 for (var j = 0; j < arrKeyCol[key1].length; j++) {
                     for (let index = 0; index < finalSplit.length; index++) {
                         if (finalSplit[index] == arrKeyCol[key1][j]) {
                             for (var p = 0; p < arrKeyCol[key1].length; p++)
                                 if (finalSplit[index] != arrKeyCol[key1][p]) {
-                                    for (const key2 in AutomatonDuplicate) {
-                                        if (Object.hasOwnProperty.call(AutomatonDuplicate, key2)) {
-                                            for (let k = 0; k < AutomatonDuplicate[key2].length; k++) {
-                                                if ((key2 != 'I/S') && (arrKeyCol[key1][p] == AutomatonDuplicate[key2][k].split('/')[0]))
-                                                    AutomatonDuplicate[key2][k] = finalSplit[index] + '/' + AutomatonDuplicate[key2][k].split('/')[1];
+                                    for (const key2 in AutomatonMin) {
+                                        if (Object.hasOwnProperty.call(AutomatonMin, key2)) {
+                                            for (let k = 0; k < AutomatonMin[key2].length; k++) {
+                                                if ((key2 != 'I/S') && (arrKeyCol[key1][p] == AutomatonMin[key2][k].split('/')[0]))
+                                                    AutomatonMin[key2][k] = finalSplit[index] + '/' + AutomatonMin[key2][k].split('/')[1];
                                             }
                                         }
                                     }
                                 }
-                            arrKeyColDuplicate[key1].push(arrKeyCol[key1][j]);
+                            arrKeyMin[key1].push(arrKeyCol[key1][j]);
                         }
                     }
                 }
             }
             else {
-                arrKeyColDuplicate[key1] = [];
-                arrKeyColDuplicate[key1].push(arrKeyCol[key1][0]);
+                arrKeyMin[key1] = [];
+                arrKeyMin[key1].push(arrKeyCol[key1][0]);
             }
         }
     }
@@ -443,6 +446,7 @@ function disableButton(buttonId) {
     // elem.classList.remove('buttonP');
     // elem.style.background = 'lightgrey';
     elem.style.visibility = 'hidden';
+    elem.style.display ='none';
 }
 
 // Создаем объект, у которого ключом является состояние, а в значениях хранятс цвета переходов по каждому символу
@@ -487,42 +491,30 @@ function getColor() {
 function Information(informationString) {
     var div = document.createElement('div');
     div.className = 'Information';
+    if(lastSplit) div.style.textAlign = 'center';
     div.innerHTML = informationString;
     div.style.display = 'block';
     document.body.appendChild(div);
 }
 
-//Функция, которая вызывается при загрузке сайта
-function start() {
-    Information(string1);
-    createTable(AutomatonWithOut);
-    createButton(false, document.body);
-}
-
-function end(EndbuttonId) {
-    if (confirm("Вы подтверждаете операцию?")) {
-        if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
-            if (checkingOuts(AutomColor) == true) {
-                disableButton('buttonP' + numOfSplits);
-                disableButton(EndbuttonId);
-                Information(string3);
-                createInput()
-                createButton(true, document.body);
-                
-            }
-            else alert("Вы построили не все разбиения!");
+/*
+//Убираем из массива цветов использованные цвета
+function removeColor(){
+    for (const key in arrKeyCol) {
+        if (Object.hasOwnProperty.call(arrKeyCol, key)) {
+            for (let i = 0; i < arrayColorsDupl.length; i++) {
+               if(arrayColorsDupl[i]==key) arrayColorsDupl.splice(i,1);
+            }  
         }
-        else alert("Вы построили не все разбиения!");
-        return (true);
-    } else {
-        alert("Подождем");
-        return (false);
     }
 }
+*/
 
+//Таблица из двух ячеек, используемая для удобства расположения двух кнопок рядом
 function twoButtons() {
     var body = document.getElementsByTagName('body')[0];
     var tbl = document.createElement('table');
+    tbl.id = 'tableB' + numOfSplits;
     tbl.className = 'flex';
     var tbdy = document.createElement('tbody');
     var tr = document.createElement('tr');
@@ -540,3 +532,32 @@ function twoButtons() {
     body.appendChild(tbl);
 }
 
+//Функция, которая вызывается при загрузке сайта
+function start() {
+    Information(string1);
+    createTable(AutomatonWithOut);
+    createButton(false, document.body);
+}
+
+//Функция, которая вызывается при нажатии на кнопку "Завершить"
+function end(EndbuttonId) {
+    if (confirm("Вы подтверждаете операцию?")) {
+        if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
+            if (checkingOuts(AutomColor) == true) {
+                disableButton('buttonP' + numOfSplits);
+                disableButton('tableB' + numOfSplits);
+                disableButton(EndbuttonId);
+                Information(string3);
+                createInput()
+                createButton(true, document.body);
+                
+            }
+            else alert("Вы построили не все разбиения!");
+        }
+        else alert("Вы построили не все разбиения!");
+        return (true);
+    } else {
+        alert("Подождем");
+        return (false);
+    }
+}
