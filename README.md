@@ -1,1 +1,1 @@
-# Testing
+# Minimization of DFA simulator.
