@@ -10,6 +10,8 @@ var numOfSplits = 1;//Переменная для хранения количе�
 var finalSplit = [];// Массив для ввода пользователем минимального автомата
 
 var lastSplit = false;//Булева переменная, для хранении информации о последнем разбиении
+var confirmEnd;
+var confirmT;
 
 var AutomColor = {};//объект с ключом состояние, а в значениях хранятся цвета переходов по каждому символу
 
@@ -19,16 +21,40 @@ var string2 = 'В дальнейшем вам необходимо перекр�
 var string3 = 'Введите по одному состоянию из каждого класса через пробел. Например, если P={{1,2},{3,5},{4}}, то вводим: 1 3 4. Согласно выбранным состояниям будет построена минимальная форма';
 
 //Create arrayColors of options to be added
-var arrayColors = ['#ffffff', '#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
-//var arrayColorsDupl = arrayColors;
-
+var colors = ['#ffffff', '#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
+var arrayColors =[];
 //Хранение автомата в виде ассоциативного массива
-var AutomatonWithOut = {
+var AutomatonWithOut0 = {
     'I/S': ['1', '2', '3', '4', '5', '6', '7', '8'],
     'a': ['7/0', '4/1', '7/0', '2/1', '4/1', '6/1', '8/0', '7/1'],
     'b': ['2/0', '4/1', '2/0', '2/1', '2/1', '7/1', '2/0', '4/1'],
     'c': ['2/1', '1/0', '2/1', '3/0', '7/0', '8/0', '6/1', '3/1']
 };
+var AutomatonWithOut1 = {
+    'I/S': ['1', '2', '3', '4', '5', '6', '7', '8'],
+    'a': ['1/0', '1/0', '1/1', '5/1', '5/0', '6/1', '5/0', '8/1'],
+    'b': ['6/1', '8/1', '7/0', '2/0', '1/1', '5/0', '2/1', '5/0'],
+};
+var AutomatonWithOut2 = {
+    'I/S': ['1', '2', '3', '4', '5', '6', '7'],
+    'a': ['3/0', '4/0', '1/0', '3/0', '4/1', '6/0', '7/0'],
+    'b': ['4/1', '6/1', '2/1', '1/1', '1/1', '7/1', '5/1'],
+    'c': ['1/1', '6/1', '4/1', '4/1', '7/0', '1/1', '3/1']
+};
+var AutomatonWithOut3 = {
+    'I/S': ['1', '2', '3', '4', '5', '6'],
+    'a': ['2/0', '1/1', '6/0', '1/0', '2/1', '1/1',],
+    'b': ['3/0', '2/0', '3/0', '5/0', '5/0', '6/0',],
+};
+
+var setOfAuts = [AutomatonWithOut0, AutomatonWithOut1, AutomatonWithOut2, AutomatonWithOut3];
+var item = setOfAuts[Math.floor(Math.random() * setOfAuts.length)];
+
+for (let i = 0; i < item['I/S'].length; i++) {
+    arrayColors.push(colors[i]);
+}
+
+var AutomatonWithOut = item;
 
 //Копия автомата без выходов
 var Automaton = {};
@@ -79,7 +105,7 @@ function checkingOuts(localArr) {
             }
         }
     }
-    if (keys.length > 1) {
+    if (keys.length > 1 && numOfSplits == 1) {
         for (let i = 0; i < keys.length - 1; i++) {
             for (let j = i + 1; j < keys.length; j++) {
                 var Index = 0;
@@ -121,7 +147,7 @@ function checkInputStates() {
                             hasAllStates++;
                         };
                         if (index > 1) {
-                            console.log(index);
+                            //console.log(index);
                             return false;
                         }
                     }
@@ -184,54 +210,80 @@ function colorizing(arr, value, td) {
 //Кнопка подтверждения
 function Confirmation(buttonId) {
     if (buttonId == 'buttonP' + numOfSplits) {
-        if (confirm("Вы подтверждаете операцию?")) {
+        if (confirmT == true) {
             getColor();
             fillArrKeyCol();
             if ((numOfSplits == 1) && (checkingOuts(Outputs) == true) && chekingSimilarP() == false) {
-                disableButton(buttonId); 
+                disableButton(buttonId);
                 createPstring(arrKeyCol);
                 Information(string2);
                 //removeColor();
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
-                
+
             }
             else if ((numOfSplits > 1) && (checkingOuts(AutomColor) == true) && chekingSimilarP() == false) {
                 disableButton(buttonId);
                 disableButton('EndbuttonP' + numOfSplits);
                 disableButton('tableB' + numOfSplits);
                 createPstring(arrKeyCol);
-                Information('Постройте разбиение P'+numOfSplits + '. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
+                Information('Постройте разбиение P' + numOfSplits + '. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
                 //removeColor();
                 createTable(Automaton, arrKeyCol);
                 twoButtons();
                 fillAutomColor();
             }
-            else alert("Неправильное разбиение");
+            else myAlert("Неправильное разбиение");
             return (true);
         } else {
-            alert("Подождем");
+            myAlert("Подождем");
             return (false);
         }
     }
     else if (buttonId == 'LastButton') {
-        if (confirm("Вы подтверждаете операцию?")) {
+        if (confirmT == true) {
             if (checkInputStates() == true) {
                 disableButton(buttonId);
                 createMinAut();
                 lastSplit = true;
-                Information('Поздравляем, вы справились!');
+                myAlert("Поздравляем, вы справились!");
+                Information('Минимальная форма исходного автомата:');
                 createTable(AutomatonMin, arrKeyMin);
             }
-            else alert("Неправильно введены состояния!");
+            else myAlert("Неправильно введены состояния!");
             return (true);
         }
         else {
-            alert("Подождем");
+            myAlert("Подождем");
             return (false);
         }
     }
+}
+
+//Создаем всплывающее окно информации
+function myAlert(text) {
+    var divpop = document.createElement('div');
+    divpop.className = 'b-popup';
+
+    var divcontent = document.createElement('div');
+    divcontent.className = 'b-popup-content';
+
+    divcontent.innerHTML = text;
+
+    var divbutton = document.createElement('div');
+    divbutton.className = 'b-popup_button';
+    var button = document.createElement('button');
+    button.className = "b_button";
+    button.innerHTML = 'Ок';
+    button.onclick = function () {
+        divpop.style.visibility = 'hidden';
+        return false;
+    };
+    divbutton.appendChild(button);
+    divcontent.appendChild(divbutton);
+    divpop.appendChild(divcontent);
+    document.body.appendChild(divpop);
 }
 
 //Кнопка для подтверждения очередного разбиения
@@ -242,10 +294,50 @@ function createButton(last, appendBody) {
     button.innerHTML = 'Подтвердить';
     button.className = 'buttonP';
     button.onclick = function () {
-        Confirmation(button.id);
+        confirmEnd = false;
+        createConfirm(button.id, confirmEnd);
         return false;
     };
     appendBody.appendChild(button);
+}
+
+//Создаем всплывающее окно подтверждения
+function createConfirm(buttonId, conformEnd) {
+    var divpop = document.createElement('div');
+    divpop.className = 'b-popup';
+
+    var divcontent = document.createElement('div');
+    divcontent.className = 'b-popup-content';
+
+    divcontent.innerHTML = "Вы подтверждаете операцию?";
+
+    var divbutton = document.createElement('div');
+    divbutton.className = 'b-popup_button';
+    var button1 = document.createElement('button');
+    button1.className = "b_button";
+    button1.innerHTML = 'Да';
+    button1.onclick = function myconfirm() {
+        divpop.style.visibility = 'hidden';
+        confirmT = true;
+        if (conformEnd == false) Confirmation(buttonId);
+        else end(buttonId);
+        return false;
+    };
+    var button2 = document.createElement('button');
+    button2.className = "b_button";
+    button2.innerHTML = 'Нет';
+    button2.onclick = function myconfirm() {
+        divpop.style.visibility = 'hidden';
+        confirmT = false;
+        if (conformEnd == false) Confirmation(buttonId);
+        else end(buttonId);
+        return false;
+    };
+    divbutton.appendChild(button1);
+    divbutton.appendChild(button2);
+    divcontent.appendChild(divbutton);
+    divpop.appendChild(divcontent);
+    document.body.appendChild(divpop);
 }
 
 //Кнопка для завершения разбиения автомата
@@ -255,35 +347,12 @@ function createEndButton(appendBody) {
     button.innerHTML = 'Завершить';
     button.className = 'buttonP';
     button.onclick = function () {
-        end(button.id);
+        confirmEnd = true;
+        createConfirm(button.id, confirmEnd)
         return false;
     };
     appendBody.appendChild(button);
 }
-
-//Функция вывод окна для ввода
-/*function createInBox() {
-    var div = document.createElement('div');
-    div.className = 'Mydiv';
-    let indexKey = 0;
-    for (const key in arrKeyCol) {
-        indexKey++;
-        if (Object.hasOwnProperty.call(arrKeyCol, key)) {
-            Pstring = Pstring + '{';
-            for (let i = 0; i < arrKeyCol[key].length; i++) {
-                Pstring = Pstring + arrKeyCol[key][i];
-                if ((i + 1) != arrKeyCol[key].length) Pstring = Pstring + ', ';
-            }
-            Pstring = Pstring + '}';
-            if (indexKey != Object.keys(arrKeyCol).length) Pstring = Pstring + ', ';
-        }
-    }
-    Pstring = Pstring + '}';
-    div.innerHTML = Pstring;
-    div.style.display = 'block';
-    document.body.appendChild(div);
-    numOfSplits++;
-}*/
 
 //Создание поля для ввода состояний минимального автомата
 function createInput() {
@@ -367,7 +436,6 @@ function createPstring(obj) {
     }
     Pstring = Pstring + '}';
     div.innerHTML = Pstring;
-    div.style.display = 'block';
     document.body.appendChild(div);
     numOfSplits++;
 }
@@ -442,11 +510,8 @@ function createTable(arrLoc, arrKeyLoc) {
 //Отключение кнопок, с которыми пользователь уже взаимодействовал
 function disableButton(buttonId) {
     var elem = document.getElementById(buttonId);
-    // elem.disabled = 'true';
-    // elem.classList.remove('buttonP');
-    // elem.style.background = 'lightgrey';
     elem.style.visibility = 'hidden';
-    elem.style.display ='none';
+    elem.style.display = 'none';
 }
 
 // Создаем объект, у которого ключом является состояние, а в значениях хранятс цвета переходов по каждому символу
@@ -482,7 +547,7 @@ function fillArrKeyCol() {
 //Заполнение массива цветами, которыми пользователь окрасил состояния
 function getColor() {
     arrGetColor = [];
-    for (var i = 0; i < arrayColors.length - 1; i++) {
+    for (var i = 0; i < arrayColors.length; i++) {
         arrGetColor.push(document.getElementsByClassName('select_el' + numOfSplits)[i].value);
     }
 }
@@ -491,24 +556,11 @@ function getColor() {
 function Information(informationString) {
     var div = document.createElement('div');
     div.className = 'Information';
-    if(lastSplit) div.style.textAlign = 'center';
+    if (lastSplit) div.style.textAlign = 'center';
     div.innerHTML = informationString;
     div.style.display = 'block';
     document.body.appendChild(div);
 }
-
-/*
-//Убираем из массива цветов использованные цвета
-function removeColor(){
-    for (const key in arrKeyCol) {
-        if (Object.hasOwnProperty.call(arrKeyCol, key)) {
-            for (let i = 0; i < arrayColorsDupl.length; i++) {
-               if(arrayColorsDupl[i]==key) arrayColorsDupl.splice(i,1);
-            }  
-        }
-    }
-}
-*/
 
 //Таблица из двух ячеек, используемая для удобства расположения двух кнопок рядом
 function twoButtons() {
@@ -541,7 +593,7 @@ function start() {
 
 //Функция, которая вызывается при нажатии на кнопку "Завершить"
 function end(EndbuttonId) {
-    if (confirm("Вы подтверждаете операцию?")) {
+    if (confirmT == true) {
         if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
             if (checkingOuts(AutomColor) == true) {
                 disableButton('buttonP' + numOfSplits);
@@ -550,14 +602,14 @@ function end(EndbuttonId) {
                 Information(string3);
                 createInput()
                 createButton(true, document.body);
-                
+
             }
-            else alert("Вы построили не все разбиения!");
+            else myAlert("Вы построили не все разбиения!");
         }
-        else alert("Вы построили не все разбиения!");
+        else myAlert("Вы построили не все разбиения!");
         return (true);
     } else {
-        alert("Подождем");
+        myAlert("Подождем");
         return (false);
     }
 }
