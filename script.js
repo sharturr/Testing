@@ -570,7 +570,7 @@ function Information2(informationString) {
     div.style.display = 'block';
     div.style.fontStyle = 'italic';
     div.style.fontWeight = '500';
-    div.style.backgroundColor = 'rgba(52, 240, 164, 0.7)';
+    div.style.backgroundColor = 'rgba(52, 240, 164, 0.4)';
     div.style.op
     document.body.appendChild(div);
 }
