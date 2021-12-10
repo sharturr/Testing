@@ -5,6 +5,7 @@
     <meta charset='utf-8'>
     <title>Минимизация конечных автоматов</title>
     <!-- <link rel='stylesheet' href='style.css'> -->
+
     <style type="text/css">
         * {
             font-family: 'Montserrat', sans-serif;
@@ -19,6 +20,46 @@
 
             background: url(https://html5book.ru/wp-content/uploads/2015/07/background39.png);
         }
+
+        /* <Боковая панель цветов> */
+        .sidenav {
+            width: 70px;
+            position: fixed;
+            z-index: 1;
+            top: 70px;
+            left: 10px;
+            background: lightgrey;
+            overflow-x: hidden;
+            border-radius: 30px;
+            padding: 5px 0px;
+        }
+
+        /* .sidenav a {
+            padding: 6px 8px 6px 16px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #2196F3;
+            display: block;
+        }
+
+        .sidenav a:hover {
+            color: #064579;
+        } */
+
+        .ColorBox {
+            margin: auto;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            width: 40px;
+            height: 40px;
+            display: block;
+            border-radius: 20px;
+        }
+
+        /* .ColorBox:enabled
+        {
+            border: 5px solid #29B0D9;
+        } */
 
         /* Шапка сайта */
         .header {
@@ -36,7 +77,7 @@
 
         /*Стиль таблицы*/
         table.Mytable {
-            width: 60%;
+            width: 70%;
             background: black;
             color: black;
             border-spacing: 3px;
@@ -53,13 +94,13 @@
             text-align: center;
         }
 
-        select {
+        /* select {
             -moz-appearance: none;
             -webkit-appearance: none;
             appearance: none;
             height: 20px;
             width: 30px;
-        }
+        } */
 
         /*Стиль кнопки для Подтверждения*/
         .buttonP {
@@ -109,7 +150,7 @@
         }
 
         /*Стиль окна информации*/
-        div.Information {
+        div.informationBlock {
             margin: auto;
             margin-top: 15px;
             margin-bottom: 15px;
@@ -135,6 +176,18 @@
 
             text-align: left;
             font-size: 15px;
+        }
+
+        .inputMDFAstates, 
+        .inputMDFAtransition{
+            margin: 0 auto;
+            display: inline;
+            background: white;
+            border: solid 2px #2EE59D;
+            border-radius: 10px;
+            text-align: center;
+            width: 20px;
+            height: 30px;
         }
 
         /* Таблица минимальной формы автомата */
