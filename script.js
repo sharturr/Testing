@@ -18,6 +18,8 @@ var DFAstateColors = {};//объект с ключом состояние, а в
 
 var infotmationHowToMakeP1 = 'Постройте разбиение P1, т.е раскрасьте 1-эквивалентные состояния. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
 var infotmationHowToMakeP2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Постройте разбиение P2. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"';
+var infoAboutSplitP = 'Внимание! Состояния не перенумеровывайте, а выбирайте по одному из разбиения!';
+//var info = 'Обратите внимание: при раскраске состояний, когда наводите курсор мыши на любой цвет — он подсвечивается голубым. Но раскрашено состояние будет в исходный цвет (тот, что до подсветки).'
 
 //Массив цветов для заполнения выпадающего списка
 const COLORS = ['#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
@@ -54,7 +56,11 @@ for (let i = 0; i < RANDOM_DFA_FROM_SET['I/S'].length; i++) {
 }
 
 const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
-
+// const DFAofIntputsOutputs = {
+//     'I/S': ['1', '2', '3'],
+//     'a': ['3/0', '2/1', '3/0'],
+//     'b': ['2/0', '2/1', '2/0']
+// };
 //Копия автомата без выходов
 var DFAofInputs = {};
 var DFAofOutputs = {};
@@ -247,6 +253,7 @@ function cofirmtAction(buttonId) {
 			fillArrColStates();
 			if ((numOfSplits == 1) && (checkingOuts(StatesOutputsOfDFA) == true) && chekingSimilarP() == false) {
 				disableButton(buttonId);
+				createHrEl();
 				writeInfoAboutPsplit(arrColStates);
 				informationBlock(infotmationHowToMakeP2);
 				createTable(DFAofInputs, arrColStates);
@@ -258,6 +265,7 @@ function cofirmtAction(buttonId) {
 				disableButton(buttonId);
 				disableButton('EndbuttonP' + numOfSplits);
 				disableButton('tableB' + numOfSplits);
+				createHrEl();
 				writeInfoAboutPsplit(arrColStates);
 				informationBlock('Постройте разбиение P' + numOfSplits + '. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"');
 				createTable(DFAofInputs, arrColStates);
@@ -276,8 +284,10 @@ function cofirmtAction(buttonId) {
 			if (isCountStatesOfMDFA() == true) {
 				isLastSplit = true;
 				disableButton(buttonId);
-				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу входов-выходов Введите в таблицу минимальную форма исходного автомата:');
+				createHrEl();
+				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу входов-выходов, введите в таблицу минимальную форма исходного автомата:');
 				createTable(DFAofIntputsOutputs);
+				importantInfoAboutSplitP(infoAboutSplitP);
 				writeInfoAboutPsplit(arrColStates);
 				createEmptyMDFAtable(DFAofIntputsOutputs, Object.keys(arrColStates).length);
 				createButton(3, document.body);
@@ -293,8 +303,9 @@ function cofirmtAction(buttonId) {
 	else if (buttonId == 'LastButton') {
 		createMDFA();
 		if (confirmAction == true) {
-			if (isStatesOfMDFA() && isMDFAofDFA() && isSizeMDFA()) {
+			if (isStatesOfMDFA() && isMDFAofDFA() && isSizeMDFA())/*(checkInputStates() == true)*/ {
 				disableButton(buttonId);
+				createHrEl();
 				myAlert("Поздравляем, вы справились!");
 				informationBlock('Таблица входов-выходов минимальной формы исходного конечного автомата:');
 				createTable(MDFA, arrKeyMin);
@@ -307,6 +318,14 @@ function cofirmtAction(buttonId) {
 			return (false);
 		}
 	}
+}
+
+//Разделитель блоков
+function createHrEl(){
+	let hr = document.createElement('hr');
+	let style = "border: 0; padding: 5px 0; border-top: 2px solid #737373"
+	hr.setAttribute("style", style);
+	document.body.appendChild(hr);
 }
 
 //Создаем всплывающее окно подтверждения
@@ -328,7 +347,7 @@ function createConfirm(buttonId, conformEnd) {
 		divpop.style.visibility = 'hidden';
 		confirmAction = true;
 		if (conformEnd == false) cofirmtAction(buttonId);
-		else end(buttonId);
+		else end(buttonId, numOfSplits);
 		return false;
 	};
 	var button2 = document.createElement('button');
@@ -338,7 +357,7 @@ function createConfirm(buttonId, conformEnd) {
 		divpop.style.visibility = 'hidden';
 		confirmAction = false;
 		if (conformEnd == false) cofirmtAction(buttonId);
-		else end(buttonId);
+		else end(buttonId, numOfSplits);
 		return false;
 	};
 	divbutton.appendChild(button1);
@@ -562,6 +581,7 @@ function partition(items, left, right) {
 	}
 	return i;
 }
+
 function quickSort(items, left, right) {
 	var index;
 	if (items.length > 1) {
@@ -754,6 +774,15 @@ function getColorsOfStates() {
 function informationBlock(informationString) {
 	var div = document.createElement('div');
 	div.className = 'informationBlock';
+	//if (isLastSplit) div.style.textAlign = 'center';
+	div.innerHTML = informationString;
+	div.style.display = 'block';
+	document.body.appendChild(div);
+}
+function importantInfoAboutSplitP(informationString) {
+	var div = document.createElement('div');
+	div.className = 'infoAboutSplitP';
+	//if (isLastSplit) div.style.textAlign = 'center';
 	div.innerHTML = informationString;
 	div.style.display = 'block';
 	document.body.appendChild(div);
@@ -803,7 +832,7 @@ function enterNumOfStatesMDFA() {
 }
 
 //Функция, которая вызывается при нажатии на кнопку "Завершить"
-function end(EndbuttonId) {
+function end(EndbuttonId, numOfSplits) {
 	if (confirmAction == true) {
 		if (EndbuttonId == 'EndbuttonP' + numOfSplits) {
 			if (checkingOuts(DFAstateColors) == true) {
