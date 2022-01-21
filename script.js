@@ -285,7 +285,7 @@ function cofirmtAction(buttonId) {
 				isLastSplit = true;
 				disableButton(buttonId);
 				createHrEl();
-				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу входов-выходов, введите в таблицу минимальную форма исходного автомата:');
+				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу входов-выходов, введите в таблицу минимальную форму исходного автомата:');
 				createTable(DFAofIntputsOutputs);
 				importantInfoAboutSplitP(infoAboutSplitP);
 				writeInfoAboutPsplit(arrColStates);
