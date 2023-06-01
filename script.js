@@ -19,10 +19,10 @@ var DFAstateColors = {};//объект с ключом состояние, а в
 var infotmationHowToMakeP1 = 'Постройте разбиение P1, т.е раскрасьте 1-эквивалентные состояния. Нажмите "Подтвердить", чтобы убедиться, что ваше разбиение верно.';
 var infotmationHowToMakeP2 = 'В дальнейшем вам необходимо перекрашивать лишь те состояния, которые образовали отдельный класс. Постройте разбиение P2. Если вы считаете, что текущее разбиение совпадает с предыдущим, то нажмите "Завершить"';
 var infoAboutSplitP = 'Внимание! Состояния не перенумеровывайте, а выбирайте по одному из разбиения!';
-//var info = 'Обратите внимание: при раскраске состояний, когда наводите курсор мыши на любой цвет — он подсвечивается голубым. Но раскрашено состояние будет в исходный цвет (тот, что до подсветки).'
-
+var info = 'К сожалению, вы не смогли выполнить задание. Повторите, пожалуйста, лекционный материал.'
+let count_left = 3;
 //Массив цветов для заполнения выпадающего списка
-const COLORS = ['#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
+const COLORS = ['#FFFFFF','#FF9999', '#FF0066', '#CC00CC', '#FF9900', '#6699CC', '#CCCC00', '#00CC66', '#FF3300'];
 const USING_COLORS = [];
 //Хранение автомата в виде ассоциативного массива
 const DFA0 = {
@@ -44,29 +44,32 @@ const DFA2 = {
 };
 const DFA3 = {
 	'I/S': ['1', '2', '3', '4', '5', '6'],
-	'a': ['2/0', '1/1', '6/0', '1/0', '2/1', '1/1',],
+	'a': ['2/0', '1/1', '2/0', '1/0', '2/1', '1/1',],
 	'b': ['3/0', '2/0', '3/0', '5/0', '5/0', '6/0',],
 };
+
+let VAlueOfClass = []
 
 const SET_OF_DFA = [DFA0, DFA1, DFA2, DFA3];
 const RANDOM_DFA_FROM_SET = SET_OF_DFA[Math.floor(Math.random() * SET_OF_DFA.length)];
 
-for (let i = 0; i < RANDOM_DFA_FROM_SET['I/S'].length; i++) {
+const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
+// const DFAofIntputsOutputs = {
+// 	'I/S': ['1', '2', '3', '4'],
+// 	'a': ['3/0', '2/1', '3/0', '2/1'],
+// 	'b': ['2/0', '2/1', '2/0', '2/1']
+// };
+
+for (let i = 0; i < DFAofIntputsOutputs['I/S'].length; i++) {
 	USING_COLORS.push(COLORS[i]);
 }
 
-const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
-// const DFAofIntputsOutputs = {
-//     'I/S': ['1', '2', '3'],
-//     'a': ['3/0', '2/1', '3/0'],
-//     'b': ['2/0', '2/1', '2/0']
-// };
 //Копия автомата без выходов
 var DFAofInputs = {};
 var DFAofOutputs = {};
 
-var oldMDFA = {};
-var MDFA = {};
+let oldMDFA = {};
+let MDFA = {};
 for (const key in DFAofIntputsOutputs) {
 	if (Object.hasOwnProperty.call(DFAofIntputsOutputs, key)) {
 		if (key == 'I/S') {
@@ -108,6 +111,7 @@ for (const key in DFAofIntputsOutputs) {
 
 //Проверка правильности очередного разбиения
 function checkingOuts(localArr) {
+	let VAlueOfClassLoc = []
 	const keys = Object.keys(arrColStates);
 	for (const key in arrColStates) {
 		if (Object.hasOwnProperty.call(arrColStates, key)) {
@@ -123,6 +127,9 @@ function checkingOuts(localArr) {
 					}
 				}
 			}
+			VAlueOfClassLoc.push(arrColStates[key][0])
+			//console.log('VAlueOfClassLoc ' + VAlueOfClassLoc)
+			//console.log('VAlueOfClass ' + VAlueOfClass)
 		}
 	}
 	if (keys.length > 1 && numOfSplits == 1) {
@@ -141,7 +148,8 @@ function checkingOuts(localArr) {
 
 		}
 	}
-
+	VAlueOfClass = VAlueOfClassLoc;
+	//console.log('VAlueOfClass ' + VAlueOfClass)
 	return true;
 }
 
@@ -246,7 +254,7 @@ function writeInfoAboutPsplit(obj) {
 //Кнопка подтверждения
 function cofirmtAction(buttonId) {
 	getInfoFromMDFAtable();
-	sortMDFA();
+	
 	if (buttonId == 'buttonP' + numOfSplits) {
 		if (confirmAction == true) {
 			getColorsOfStates();
@@ -259,7 +267,7 @@ function cofirmtAction(buttonId) {
 				createTable(DFAofInputs, arrColStates);
 				twoButtons();
 				fillAutomColor();
-
+				count_left = 3;
 			}
 			else if ((numOfSplits > 1) && (checkingOuts(DFAstateColors) == true) && chekingSimilarP() == false) {
 				disableButton(buttonId);
@@ -271,8 +279,18 @@ function cofirmtAction(buttonId) {
 				createTable(DFAofInputs, arrColStates);
 				twoButtons();
 				fillAutomColor();
+				count_left = 3;
 			}
-			else myAlert("Неправильное разбиение");
+			else if (count_left<=0){
+				lecture_notify(info);
+				//
+				//  Your logic here....
+				//
+			}
+			else {
+				myAlert("Неправильное разбиение");
+				count_left--;
+			}
 			return (true);
 		} else {
 			myAlert("Подождем");
@@ -285,14 +303,23 @@ function cofirmtAction(buttonId) {
 				isLastSplit = true;
 				disableButton(buttonId);
 				createHrEl();
-				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу входов-выходов, введите в таблицу минимальную форму исходного автомата:');
+				informationBlock('Ориентируясь на финальное разбиение P и исходную таблицу переходов-выходов, введите в таблицу минимальную форму исходного автомата:');
 				createTable(DFAofIntputsOutputs);
-				importantInfoAboutSplitP(infoAboutSplitP);
 				writeInfoAboutPsplit(arrColStates);
 				createEmptyMDFAtable(DFAofIntputsOutputs, Object.keys(arrColStates).length);
 				createButton(3, document.body);
+				count_left = 3;
 			}
-			else myAlert("Неправильно введенное количество состояний!");
+			else if (count_left<=0){
+				lecture_notify(info);
+				//
+				//  Your logic here....
+				//
+			}
+			else { 
+				myAlert("Неправильно введенное количество состояний!");
+				count_left--;
+			}
 			return (true);
 		}
 		else {
@@ -303,14 +330,31 @@ function cofirmtAction(buttonId) {
 	else if (buttonId == 'LastButton') {
 		createMDFA();
 		if (confirmAction == true) {
-			if (isStatesOfMDFA() && isMDFAofDFA() && isSizeMDFA())/*(checkInputStates() == true)*/ {
+			if (isMDFAofDFA() && isSizeMDFA()) {
 				disableButton(buttonId);
 				createHrEl();
 				myAlert("Поздравляем, вы справились!");
-				informationBlock('Таблица входов-выходов минимальной формы исходного конечного автомата:');
-				createTable(MDFA, arrKeyMin);
+				if (!compareObjects(oldMDFA, MDFA)){
+					informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${VAlueOfClass}}`);
+					createTable(MDFA, arrKeyMin);
+				}
+				else{
+					informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${VAlueOfClass}}`);
+          createTable(oldMDFA, arrKeyMin);
+          informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${MDFA['I/S']}}`);
+					createTable(MDFA, arrKeyMin);
+				}
 			}
-			else myAlert("Неправильно построена минимальная форма исходного автомата!");
+			else if (count_left<=0){
+				lecture_notify(info);
+				//
+				//  Your logic here....
+				//
+			}
+			else {
+				myAlert("Неправильно построена минимальная форма исходного автомата!");
+				count_left--;
+			}
 			return (true);
 		}
 		else {
@@ -318,6 +362,21 @@ function cofirmtAction(buttonId) {
 			return (false);
 		}
 	}
+}
+
+function compareObjects(obj1, obj2) {
+  for (let key in obj1) {
+    if (obj1.hasOwnProperty(key) && obj2.hasOwnProperty(key)) {
+			for (let index = 0; index < obj1.length; index++) {
+				if (obj1[key][index] != obj2[key][index]) {
+					return false; // Значения ключей не совпадают
+				}
+			}
+    } else {
+      return false; // Ключ отсутствует в одном из объектов
+    }
+  }
+  return true; // Значения всех ключей совпадают
 }
 
 //Разделитель блоков
@@ -478,7 +537,10 @@ function createEmptyMDFAtable(arrLoc, NumOfStatesMDFA) {
 //Проверяем размерность MDFA
 function isSizeMDFA() {
 	if (MDFA['I/S'].length == oldMDFA['I/S'].length) return true;
-	else return false;
+	else {
+		console.log("Размерность несовпадает. Функция прорерки на строке 510")
+		return false;
+	}
 }
 
 function isCountStatesOfMDFA() {
@@ -528,27 +590,27 @@ function getInfoFromMDFAtable() {
 	}
 }
 
-//Сотритируем состояния MDFA по порядку
-function sortMDFA() {
+//Сотритируем состояния array по порядку
+function sortMDFA(array) {
 	var inputsOfMDFA = [];
 	var i = 0;
-	for (const key in MDFA) {
+	for (const key in array) {
 		inputsOfMDFA[i] = key;
 		i++;
 	}
 	var locStates = [];
-	for (let i = 0; i < MDFA['I/S'].length; i++) {
-		locStates[i] = MDFA['I/S'][i];
+	for (let i = 0; i < array['I/S'].length; i++) {
+		locStates[i] = array['I/S'][i];
 	}
 	var swap;
 	quickSort(locStates);
 	for (let i = 0; i < locStates.length; i++) {
-		for (let j = 0; j < MDFA['I/S'].length; j++) {
-			if (locStates[i] == MDFA['I/S'][j]) {
+		for (let j = 0; j < array['I/S'].length; j++) {
+			if (locStates[i] == array['I/S'][j]) {
 				for (let k = 0; k < inputsOfMDFA.length; k++) {
-					swap = MDFA[inputsOfMDFA[k]][i];
-					MDFA[inputsOfMDFA[k]][i] = MDFA[inputsOfMDFA[k]][j];
-					MDFA[inputsOfMDFA[k]][j] = swap;
+					swap = array[inputsOfMDFA[k]][i];
+					array[inputsOfMDFA[k]][i] = array[inputsOfMDFA[k]][j];
+					array[inputsOfMDFA[k]][j] = swap;
 				}
 				break;
 			}
@@ -598,10 +660,15 @@ function quickSort(items, left, right) {
 	return items;
 }
 
-// Проверяем состояния введеные в таблицу oldMDFA
+// Проверяем состояния введеные в таблицу
 function isStatesOfMDFA() {
 	statesOfMDFA = [];
 	var inputStateValues = document.getElementsByClassName('inputMDFAstates');
+	var inputStateValues = [];
+	for (let index = 0; index < inputStateValues.length; index++) {
+		inputStates.push(index)
+		console.log(inputStateValues.item(index).value)
+	}
 	for (let index = 0; index < inputStateValues.length; index++) {
 		statesOfMDFA[index] = inputStateValues.item(index).value;
 	}
@@ -617,13 +684,13 @@ function isStatesOfMDFA() {
 							countOfMDFAstates++;
 						};
 						if (countStatesOfClass > 1) {
-							//console.log(index);
 							return false;
 						}
 					}
 
 				}
 			}
+			console.log('It\'s all good')
 		}
 		if (countOfMDFAstates == statesOfMDFA.length)
 			return true;
@@ -631,29 +698,83 @@ function isStatesOfMDFA() {
 	else return false;
 }
 
+function generatePermutations(array) {
+  const permutations = [];
+
+  function permute(arr, start = 0) {
+    if (start === arr.length - 1) {
+      permutations.push([...arr]); // Добавляем перестановку в массив
+      return;
+    }
+
+    for (let i = start; i < arr.length; i++) {
+      [arr[start], arr[i]] = [arr[i], arr[start]]; // Меняем местами элементы
+      permute(arr, start + 1); // Рекурсивно генерируем следующую перестановку
+      [arr[start], arr[i]] = [arr[i], arr[start]]; // Восстанавливаем исходный порядок элементов
+    }
+  }
+
+  permute(array);
+  return permutations;
+}
+
+
+let MDFAcopy = {}
 // Проверяем переходы по состояниям введеные в таблицу oldMDFA
 function isMDFAofDFA() {
-	for (const key in oldMDFA) {
-		for (let index = 0; index < oldMDFA[key].length; index++) {
-			if (oldMDFA[key][index] != MDFA[key][index]) return false;
+	const strArray = VAlueOfClass.map((num) => String(num));
+	const allPermutations = generatePermutations(strArray);
+
+	// Пример прохода по всем перестановкам
+	for (let i = 0; i < allPermutations.length; i++) {
+		
+		MDFAcopy = JSON.parse(JSON.stringify(MDFA));
+		console.log(MDFAcopy)
+		const permutation = allPermutations[i];
+		//console.log(permutation);
+		if (permutation.length == MDFAcopy['I/S'].length){
+			for (let index = 0; index < MDFAcopy['I/S'].length; index++) {
+				MDFAcopy['I/S'][index] = permutation[index];
+			}
+			for (const key in MDFA) {
+				MDFAcopy
+				if (Object.hasOwnProperty.call(MDFA, key)) {
+					for (let index = 0; index < MDFA[key].length; index++) {
+							if ('I/S' == key) continue
+							else{
+								for (let jindex = 0; jindex < MDFA['I/S'].length; jindex++) {
+									if(MDFAcopy[key][index].split('/')[0] == MDFA['I/S'][jindex]){
+										MDFAcopy[key][index] = MDFAcopy['I/S'][jindex]+'/'+MDFAcopy[key][index].split('/')[1];
+										break;
+									}
+								}
+								
+						}
+					}
+					
+				}
+			}
 		}
+		sortMDFA(MDFAcopy);
+		if (compareObjects(oldMDFA, MDFAcopy)) return true
 	}
-	return true;
+	return false;
 }
 
 //Атоматическое создание MDFA
 function createMDFA() {
 	numOfSplits--;
-	var inputStateValues = document.getElementsByClassName('inputMDFAstates')
+	var inputStateValues = VAlueOfClass
+	//console.log(inputStateValues)
 	//Происходит дублирование по одному состоянию из каждого класса (строится минимальный автомат)
 	for (const key in DFAofIntputsOutputs) {
 		oldMDFA[key] = [];
 		if (Object.hasOwnProperty.call(DFAofIntputsOutputs, key)) {
 			for (let i = 0; i < DFAofIntputsOutputs[key].length; i++) {
 				for (let j = 0; j < inputStateValues.length; j++) {
-					if ((key != 'I/S') && (DFAofIntputsOutputs['I/S'][i] == inputStateValues[j].value))
+					if ((key != 'I/S') && (DFAofIntputsOutputs['I/S'][i] == inputStateValues[j]))
 						oldMDFA[key].push(DFAofIntputsOutputs[key][i]);
-					else if (DFAofIntputsOutputs['I/S'][i] == inputStateValues[j].value)
+					else if (DFAofIntputsOutputs['I/S'][i] == inputStateValues[j])
 						oldMDFA[key].push(DFAofIntputsOutputs[key][i]);
 				}
 
@@ -668,14 +789,14 @@ function createMDFA() {
 				arrKeyMin[key1] = [];
 				for (var j = 0; j < arrColStates[key1].length; j++) {
 					for (let index = 0; index < inputStateValues.length; index++) {
-						if (inputStateValues[index].value == arrColStates[key1][j]) {
+						if (inputStateValues[index] == arrColStates[key1][j]) {
 							for (var p = 0; p < arrColStates[key1].length; p++)
-								if (inputStateValues[index].value != arrColStates[key1][p]) {
+								if (inputStateValues[index] != arrColStates[key1][p]) {
 									for (const key2 in oldMDFA) {
 										if (Object.hasOwnProperty.call(oldMDFA, key2)) {
 											for (let k = 0; k < oldMDFA[key2].length; k++) {
 												if ((key2 != 'I/S') && (arrColStates[key1][p] == oldMDFA[key2][k].split('/')[0]))
-													oldMDFA[key2][k] = inputStateValues[index].value + '/' + oldMDFA[key2][k].split('/')[1];
+													oldMDFA[key2][k] = inputStateValues[index] + '/' + oldMDFA[key2][k].split('/')[1];
 											}
 										}
 									}
@@ -779,13 +900,31 @@ function informationBlock(informationString) {
 	div.style.display = 'block';
 	document.body.appendChild(div);
 }
-function importantInfoAboutSplitP(informationString) {
-	var div = document.createElement('div');
-	div.className = 'infoAboutSplitP';
-	//if (isLastSplit) div.style.textAlign = 'center';
-	div.innerHTML = informationString;
-	div.style.display = 'block';
-	document.body.appendChild(div);
+
+function lecture_notify(text) {
+	var divpop = document.createElement('div');
+    divpop.className = 'b-popup';
+
+    var divcontent = document.createElement('div');
+    divcontent.className = 'b-popup-content';
+
+    divcontent.innerHTML = text + '<br><br>https://stepik.org/lesson/371035/step/1?unit=358523';
+
+    var divbutton = document.createElement('div');
+    divbutton.className = 'b-popup_link';
+    var link = document.createElement('a');
+    link.className = "link";
+    link.innerHTML = 'Лекция';
+    link.href = 'https://stepik.org/lesson/371035/step/1?unit=358523';
+    link.target = "_blank";
+    link.onclick = function () {
+        divpop.style.visibility = 'hidden';
+        return true;
+    };
+    divbutton.appendChild(link);
+    divcontent.appendChild(divbutton);
+    divpop.appendChild(divcontent);
+    document.body.appendChild(divpop);
 }
 
 //Функция, которая вызывается при загрузке сайта
@@ -843,9 +982,27 @@ function end(EndbuttonId, numOfSplits) {
 				enterNumOfStatesMDFA();
 				createButton(2, document.body);
 			}
-			else myAlert("Вы построили не все разбиения!");
+			else if (count_left<=0){
+				lecture_notify(info);
+				//
+				//  Your logic here....
+				//
+			}
+			else {
+				myAlert("Вы построили не все разбиения!");
+				count_left--;
+			}
 		}
-		else myAlert("Вы построили не все разбиения!");
+		else if (count_left<=0){
+			lecture_notify(info);
+			//
+			//  Your logic here....
+			//
+		}
+		else {
+			myAlert("Вы построили не все разбиения!");
+			count_left--;
+		}
 		return (true);
 	} else {
 		myAlert("Подождем");
