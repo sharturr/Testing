@@ -9,7 +9,7 @@ var arrKeyColDuplicate = {};//Хранит в себе предыдущие па
 var numOfSplits = 1;//Переменная для хранения количеств разбиений
 
 var statesOfMDFA = [];// Массив для ввода пользователем минимального автомата
-
+var PstringFinale = {}
 var isLastSplit = false;//Булева переменная, для хранении информации о последнем разбиении
 var confirmLastAction;
 var confirmAction;
@@ -235,10 +235,12 @@ function writeInfoAboutPsplit(obj) {
 	let indexKey = 0;
 	for (const key in obj) {
 		indexKey++;
+		PstringFinale[indexKey] = []
 		if (Object.hasOwnProperty.call(obj, key)) {
 			Pstring = Pstring + '{';
 			for (let i = 0; i < obj[key].length; i++) {
 				Pstring = Pstring + obj[key][i];
+				PstringFinale[indexKey].push(obj[key][i]);
 				if ((i + 1) != obj[key].length) Pstring = Pstring + ', ';
 			}
 			Pstring = Pstring + '}';
@@ -334,16 +336,8 @@ function cofirmtAction(buttonId) {
 				disableButton(buttonId);
 				createHrEl();
 				myAlert("Поздравляем, вы справились!");
-				if (!compareObjects(oldMDFA, MDFA)){
-					informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${VAlueOfClass}}`);
-					createTable(MDFA, arrKeyMin);
-				}
-				else{
-					informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${VAlueOfClass}}`);
-          createTable(oldMDFA, arrKeyMin);
-          informationBlock(`Таблица минимальной формы конечного автомата <br> (состояния исходного конечного автомата переименованы как {${MDFA['I/S']}}`);
-					createTable(MDFA, arrKeyMin);
-				}
+				informationBlock(`Таблица минимальной формы конечного автомата. <br> Обозначения классов разбиения P сопоставляются следующим образом: <br>${FN(PstringFinale, MDFA)}`);
+				createTable(MDFA, arrKeyMin);
 			}
 			else if (count_left<=0){
 				lecture_notify(info);
@@ -377,6 +371,18 @@ function compareObjects(obj1, obj2) {
     }
   }
   return true; // Значения всех ключей совпадают
+}
+
+function FN(obj1, obj2) {
+	let index = 0;
+	let string = '';
+	for (const key in obj1) {
+		if (Object.hasOwnProperty.call(PstringFinale, key)) {
+			string = string + `{${obj1[key]}} - {${obj2['I/S'][index]}}<br>`;
+			index++;
+		}
+	}
+	return string;
 }
 
 //Разделитель блоков
