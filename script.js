@@ -336,7 +336,7 @@ function cofirmtAction(buttonId) {
 				disableButton(buttonId);
 				createHrEl();
 				myAlert("Поздравляем, вы справились!");
-				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответсвия между новыми состояними и состояниями разбиения класса P: <br>${FN(PstringFinale, MDFA)}`);
+				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответсвия между новыми обозначениями состояний и классами разбиения P: <br>${FN(PstringFinale, MDFA)}`);
 				createTable(MDFA, arrKeyMin);
 			}
 			else if (count_left<=0){
