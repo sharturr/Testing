@@ -378,7 +378,7 @@ function FN(obj1, obj2) {
 	let string = '';
 	for (const key in obj1) {
 		if (Object.hasOwnProperty.call(PstringFinale, key)) {
-			string = string + `{${obj1[key]}} - {${obj2['I/S'][index]}}<br>`;
+			string = string + `{${obj1[key]}} - ${obj2['I/S'][index]}<br>`;
 			index++;
 		}
 	}
