@@ -53,12 +53,12 @@ let VAlueOfClass = []
 const SET_OF_DFA = [DFA0, DFA1, DFA2, DFA3];
 const RANDOM_DFA_FROM_SET = SET_OF_DFA[Math.floor(Math.random() * SET_OF_DFA.length)];
 
-const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
-// const DFAofIntputsOutputs = {
-// 	'I/S': ['1', '2', '3', '4'],
-// 	'a': ['3/0', '2/1', '3/0', '2/1'],
-// 	'b': ['2/0', '2/1', '2/0', '2/1']
-// };
+// const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
+const DFAofIntputsOutputs = {
+	'I/S': ['1', '2', '3', '4'],
+	'a': ['3/0', '2/1', '3/0', '2/1'],
+	'b': ['2/0', '2/1', '2/0', '2/1']
+};
 
 for (let i = 0; i < DFAofIntputsOutputs['I/S'].length; i++) {
 	USING_COLORS.push(COLORS[i]);
@@ -128,8 +128,6 @@ function checkingOuts(localArr) {
 				}
 			}
 			VAlueOfClassLoc.push(arrColStates[key][0])
-			//console.log('VAlueOfClassLoc ' + VAlueOfClassLoc)
-			//console.log('VAlueOfClass ' + VAlueOfClass)
 		}
 	}
 	if (keys.length > 1 && numOfSplits == 1) {
@@ -149,7 +147,6 @@ function checkingOuts(localArr) {
 		}
 	}
 	VAlueOfClass = VAlueOfClassLoc;
-	//console.log('VAlueOfClass ' + VAlueOfClass)
 	return true;
 }
 
@@ -255,7 +252,6 @@ function writeInfoAboutPsplit(obj) {
 
 //Кнопка подтверждения
 function cofirmtAction(buttonId) {
-	getInfoFromMDFAtable();
 	
 	if (buttonId == 'buttonP' + numOfSplits) {
 		if (confirmAction == true) {
@@ -332,11 +328,11 @@ function cofirmtAction(buttonId) {
 	else if (buttonId == 'LastButton') {
 		createMDFA();
 		if (confirmAction == true) {
-			if (isMDFAofDFA() && isSizeMDFA()) {
+			if (getInfoFromMDFAtable() && isSizeMDFA() && isMDFAofDFA()) {
 				disableButton(buttonId);
 				createHrEl();
 				myAlert("Поздравляем, вы справились!");
-				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответсвия между новыми обозначениями состояний и классами разбиения P: <br>${FN(PstringFinale, MDFA)}`);
+				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответсвия между новыми состояними и состояниями разбиения класса P: <br>${FN(PstringFinale, MDFA)}`);
 				createTable(MDFA, arrKeyMin);
 			}
 			else if (count_left<=0){
@@ -361,8 +357,8 @@ function cofirmtAction(buttonId) {
 function compareObjects(obj1, obj2) {
   for (let key in obj1) {
     if (obj1.hasOwnProperty(key) && obj2.hasOwnProperty(key)) {
-			for (let index = 0; index < obj1.length; index++) {
-				if (obj1[key][index] != obj2[key][index]) {
+			for (let index = 0; index < Object.keys(obj1).length; index++) {
+				if (obj1[key][index] !== obj2[key][index]) {
 					return false; // Значения ключей не совпадают
 				}
 			}
@@ -378,7 +374,7 @@ function FN(obj1, obj2) {
 	let string = '';
 	for (const key in obj1) {
 		if (Object.hasOwnProperty.call(PstringFinale, key)) {
-			string = string + `{${obj1[key]}} - ${obj2['I/S'][index]}<br>`;
+			string = string + `{${obj1[key]}} - {${obj2['I/S'][index]}}<br>`;
 			index++;
 		}
 	}
@@ -542,7 +538,7 @@ function createEmptyMDFAtable(arrLoc, NumOfStatesMDFA) {
 
 //Проверяем размерность MDFA
 function isSizeMDFA() {
-	if (MDFA['I/S'].length == oldMDFA['I/S'].length) return true;
+	if (MDFA['I/S'].length === oldMDFA['I/S'].length) return true;
 	else {
 		console.log("Размерность несовпадает. Функция прорерки на строке 510")
 		return false;
@@ -558,7 +554,6 @@ function isCountStatesOfMDFA() {
 //Получаем значения, введенные в таблицу MDFA
 function getInfoFromMDFAtable() {
 	StatesTransOfMDFA = {};
-	MDFA = {};
 	var count = 0;
 	var inputStateValues = document.getElementsByClassName('inputMDFAstates');
 	var inputTransValues = document.getElementsByClassName('inputMDFAtransition');
@@ -566,10 +561,16 @@ function getInfoFromMDFAtable() {
 		var ISV = inputStateValues.item(jndex);
 		StatesTransOfMDFA[ISV.value] = [];
 		for (let index = 0; index < Object.keys(DFAofIntputsOutputs).length - 1; index++, countOfITV += inputStateValues.length * 2) {
-			StatesTransOfMDFA[ISV.value][index] =
+			if(inputTransValues.item(countOfITV).value != '' && inputTransValues.item(countOfITV + 1).value != '') {
+				StatesTransOfMDFA[ISV.value][index] =
 				inputTransValues.item(countOfITV).value +
 				'/' +
 				inputTransValues.item(countOfITV + 1).value;
+			}
+			else {
+				console.log("Ошибка чтения MDFA")
+				return false;
+			}
 		}
 		count += 2;
 		countOfITV = count;
@@ -587,6 +588,7 @@ function getInfoFromMDFAtable() {
 					if (DFAofIntputsOutputs[key][0] == StatesTransOfDFA[DFAofIntputsOutputs['I/S'][0]][trans]) {
 						for (let i = 0; i < MDFA['I/S'].length; i++) {
 							MDFA[key].push(StatesTransOfMDFA[MDFA['I/S'][i]][trans]);
+							console.log(StatesTransOfMDFA[MDFA['I/S'][i]][trans])
 						}
 						break;
 					}
@@ -594,6 +596,8 @@ function getInfoFromMDFAtable() {
 			}
 		}
 	}
+	console.log("Создан объект MDFA")
+	return true;
 }
 
 //Сотритируем состояния array по порядку
@@ -673,7 +677,6 @@ function isStatesOfMDFA() {
 	var inputStateValues = [];
 	for (let index = 0; index < inputStateValues.length; index++) {
 		inputStates.push(index)
-		console.log(inputStateValues.item(index).value)
 	}
 	for (let index = 0; index < inputStateValues.length; index++) {
 		statesOfMDFA[index] = inputStateValues.item(index).value;
@@ -724,7 +727,6 @@ function generatePermutations(array) {
   return permutations;
 }
 
-
 let MDFAcopy = {}
 // Проверяем переходы по состояниям введеные в таблицу oldMDFA
 function isMDFAofDFA() {
@@ -735,9 +737,7 @@ function isMDFAofDFA() {
 	for (let i = 0; i < allPermutations.length; i++) {
 		
 		MDFAcopy = JSON.parse(JSON.stringify(MDFA));
-		console.log(MDFAcopy)
 		const permutation = allPermutations[i];
-		//console.log(permutation);
 		if (permutation.length == MDFAcopy['I/S'].length){
 			for (let index = 0; index < MDFAcopy['I/S'].length; index++) {
 				MDFAcopy['I/S'][index] = permutation[index];
@@ -751,6 +751,7 @@ function isMDFAofDFA() {
 								for (let jindex = 0; jindex < MDFA['I/S'].length; jindex++) {
 									if(MDFAcopy[key][index].split('/')[0] == MDFA['I/S'][jindex]){
 										MDFAcopy[key][index] = MDFAcopy['I/S'][jindex]+'/'+MDFAcopy[key][index].split('/')[1];
+										
 										break;
 									}
 								}
@@ -774,7 +775,6 @@ function isMDFAofDFA() {
 function createMDFA() {
 	numOfSplits--;
 	var inputStateValues = VAlueOfClass
-	//console.log(inputStateValues)
 	//Происходит дублирование по одному состоянию из каждого класса (строится минимальный автомат)
 	for (const key in DFAofIntputsOutputs) {
 		oldMDFA[key] = [];
