@@ -53,12 +53,12 @@ let VAlueOfClass = []
 const SET_OF_DFA = [DFA0, DFA1, DFA2, DFA3];
 const RANDOM_DFA_FROM_SET = SET_OF_DFA[Math.floor(Math.random() * SET_OF_DFA.length)];
 
-// const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
-const DFAofIntputsOutputs = {
-	'I/S': ['1', '2', '3', '4'],
-	'a': ['3/0', '2/1', '3/0', '2/1'],
-	'b': ['2/0', '2/1', '2/0', '2/1']
-};
+const DFAofIntputsOutputs = RANDOM_DFA_FROM_SET;
+// const DFAofIntputsOutputs = {
+// 	'I/S': ['1', '2', '3', '4'],
+// 	'a': ['3/0', '2/1', '3/0', '2/1'],
+// 	'b': ['2/0', '2/1', '2/0', '2/1']
+// };
 
 for (let i = 0; i < DFAofIntputsOutputs['I/S'].length; i++) {
 	USING_COLORS.push(COLORS[i]);
@@ -291,7 +291,6 @@ function cofirmtAction(buttonId) {
 			}
 			return (true);
 		} else {
-			myAlert("Подождем");
 			return (false);
 		}
 	}
@@ -321,7 +320,6 @@ function cofirmtAction(buttonId) {
 			return (true);
 		}
 		else {
-			myAlert("Подождем");
 			return (false);
 		}
 	}
@@ -332,7 +330,7 @@ function cofirmtAction(buttonId) {
 				disableButton(buttonId);
 				createHrEl();
 				myAlert("Поздравляем, вы справились!");
-				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответсвия между новыми состояними и состояниями разбиения класса P: <br>${FN(PstringFinale, MDFA)}`);
+				informationBlock(`Таблица минимальной формы конечного автомата. <br> Соответствия между новыми обозначениями состояний и классами разбиения P: <br>${FN(PstringFinale, MDFA)}`);
 				createTable(MDFA, arrKeyMin);
 			}
 			else if (count_left<=0){
@@ -348,7 +346,6 @@ function cofirmtAction(buttonId) {
 			return (true);
 		}
 		else {
-			myAlert("Подождем");
 			return (false);
 		}
 	}
@@ -904,7 +901,6 @@ function getColorsOfStates() {
 function informationBlock(informationString) {
 	var div = document.createElement('div');
 	div.className = 'informationBlock';
-	//if (isLastSplit) div.style.textAlign = 'center';
 	div.innerHTML = informationString;
 	div.style.display = 'block';
 	document.body.appendChild(div);
@@ -1014,7 +1010,6 @@ function end(EndbuttonId, numOfSplits) {
 		}
 		return (true);
 	} else {
-		myAlert("Подождем");
 		return (false);
 	}
 }
